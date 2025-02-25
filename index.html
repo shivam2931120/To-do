@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-do List</title>
+  <style>
+  body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 550px;
+  }
+  
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+  
+  .input-section {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  #taskInput, #dueDateInput, #priorityInput {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  
+  #addTaskBtn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background-color: #000000;
+    color: white;
+    border-radius: 5r79-,jhgfd px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  #addTaskBtn:hover {
+    background-color: #218838;
+    color: rgb(255, 255, 255);
+  }
+  
+  .search-section {
+    margin-bottom: 20px;
+  }
+  
+  #searchInput {
+    width: 530px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  
+  .filter-section {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .filter-section button {
+    padding: 10px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .filter-section button:hover {
+    background-color: #0056b3;
+  }
+  
+  .task-count {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 14px;
+    color: #555;
+  }
+  
+  #taskList {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  #taskList li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
+  }
+  
+  #taskList li.completed {
+    background-color: #d4edda;
+    text-decoration: line-through;
+    color: #155724;
+  }
+  
+  #taskList li.overdue {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+  }
+  
+  #taskList li input[type="checkbox"] {
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  
+  #taskList li button {
+    background-color: #dc3545;
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 10px;
+  }
+  
+  #taskList li button.edit-btn {
+    background-color: #ffc107;
+  }
+  
+  #taskList li button:hover {
+    opacity: 0.8;
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>To-Do List</h1>
+    <div class="input-section">
+      <input type="text" id="taskInput" placeholder="Add a new task...">
+      <input type="date" id="dueDateInput">
+      <select id="priorityInput">
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+      </select>
+      <button id="addTaskBtn">Add Task</button>
+    </div>
+    <div class="search-section">
+      <input type="text" id="searchInput" placeholder="Search tasks...">
+    </div>
+    <div class="filter-section">
+      <button id="showAll">All</button>
+      <button id="showCompleted">Completed</button>
+      <button id="showPending">Pending</button>
+      <button id="clearAll">Clear All</button>
+    </div>
+    <div class="task-count">
+      <span>Pending: <span id="pendingCount">0</span></span>
+      <span>Completed: <span id="completedCount">0</span></span>
+    </div>
+    <ul id="taskList"></ul>
+  </div>
+  <script>
+    const taskInput = document.getElementById('taskInput');
+    const dueDateInput = document.getElementById('dueDateInput');
+    const priorityInput = document.getElementById('priorityInput');
+    const addTaskBtn = document.getElementById('addTaskBtn');
+    const searchInput = document.getElementById('searchInput');
+    const taskList = document.getElementById('taskList');
+    const showAll = document.getElementById('showAll');
+    const showCompleted = document.getElementById('showCompleted');
+    const showPending = document.getElementById('showPending');
+    const clearAll = document.getElementById('clearAll');
+    const pendingCount = document.getElementById('pendingCount');
+    const completedCount = document.getElementById('completedCount');
+
+    let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+    function renderTasks(filter = 'all', searchQuery = '') {
+    taskList.innerHTML = '';
+    const filteredTasks = tasks.filter(task => {
+        const matchesFilter = filter === 'completed' ? task.completed : filter === 'pending' ? !task.completed : true;
+        const matchesSearch = task.text.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesFilter && matchesSearch;
+    });
+
+    filteredTasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        if (task.completed) li.classList.add('completed');
+        if (task.dueDate && new Date(task.dueDate) < new Date() && !task.completed) {
+        li.classList.add('overdue');
+        }
+        li.innerHTML = `
+        <div>
+            <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleComplete(${index})">
+            <span>${task.text} (Due: ${task.dueDate || 'No date'}, Priority: ${task.priority})</span>
+        </div>
+        <div>
+            <button class="edit-btn" onclick="editTask(${index})">Edit</button>
+            <button onclick="deleteTask(${index})">Delete</button>
+        </div>
+        `;
+        taskList.appendChild(li);
+    });
+
+    updateTaskCount();
+    }
+
+    addTaskBtn.addEventListener('click', () => {
+    const text = taskInput.value.trim();
+    const dueDate = dueDateInput.value;
+    const priority = priorityInput.value;
+    if (text) {
+        tasks.push({ text, dueDate, priority, completed: false });
+        taskInput.value = '';
+        dueDateInput.value = '';
+        saveTasks();
+        renderTasks();
+    }
+    });
+
+    function editTask(index) {
+    const newText = prompt('Edit task:', tasks[index].text);
+    if (newText !== null) {
+        tasks[index].text = newText.trim();
+        saveTasks();
+        renderTasks();
+    }
+    }
+
+    function toggleComplete(index) {
+    tasks[index].completed = !tasks[index].completed;
+    saveTasks();
+    renderTasks();
+    }
+
+    function deleteTask(index) {
+    tasks.splice(index, 1);
+    saveTasks();
+    renderTasks();
+    }
+
+    clearAll.addEventListener('click', () => {
+    if (confirm('Are you sure you want to clear all tasks?')) {
+        tasks = [];
+        saveTasks();
+        renderTasks();
+    }
+    });
+
+    function saveTasks() {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    showAll.addEventListener('click', () => renderTasks('all'));
+    showCompleted.addEventListener('click', () => renderTasks('completed'));
+    showPending.addEventListener('click', () => renderTasks('pending'));
+
+    searchInput.addEventListener('input', () => {
+    renderTasks('all', searchInput.value.trim());
+    });
+
+    function updateTaskCount() {
+    const pending = tasks.filter(task => !task.completed).length;
+    const completed = tasks.filter(task => task.completed).length;
+    pendingCount.textContent = pending;
+    completedCount.textContent = completed;
+    }
+
+    renderTasks();
+  </script>
+</body>
+</html>
