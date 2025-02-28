@@ -151,21 +151,50 @@
     opacity: 0.8;
   }
 
-  @media (min-width: 600px) {
+  @media (max-width: 599px) {
+    .container {
+      padding: 15px;
+      margin: 10px;
+      width: 95%;
+    }
+
+    h1 {
+      font-size: 22px;
+    }
+
     .input-section {
-      flex-direction: row;
+      flex-direction: column;  
     }
 
     #taskInput, #dueDateInput, #priorityInput {
-      width: auto;
+      font-size: 14px; 
     }
 
     #addTaskBtn {
-      width: auto;
+      font-size: 14px; 
+      width: 100%;
     }
 
     .filter-section {
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
+    }
+
+    .filter-section button {
+      flex: 1 1 45%; 
+      font-size: 12px; 
+    }
+
+    .task-count {
+      font-size: 12px; 
+    }
+
+    #taskList li {
+      padding: 8px; 
+      margin-bottom: 8px; 
+    }
+
+    #taskList li button {
+      font-size: 12px; 
     }
   }
   </style>
